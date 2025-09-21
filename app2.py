@@ -178,6 +178,9 @@ ttk.Checkbutton(frame_cadastro, text="Apostila 2", variable=var_ap2).grid(row=4,
 
 ttk.Button(frame_cadastro, text="Adicionar Servo", command=adicionar_servo).grid(row=5, column=1, pady=5)
 
+# --- Exportar ---
+ttk.Button(janela, text="Exportar para Excel", command=exportar_excel).pack(pady=5)
+
 # --- Frame com Scrollbar para resultados ---
 frame_scroll = ttk.Frame(janela)
 frame_scroll.pack(fill='both', expand=True, padx=10, pady=10)
@@ -201,8 +204,5 @@ scrollbar.pack(side="right", fill="y")
 
 # Substitui o antigo frame_resultados
 frame_resultados = scrollable_frame
-
-# --- Exportar ---
-ttk.Button(janela, text="Exportar para Excel", command=exportar_excel).pack(pady=5)
 
 janela.mainloop()
