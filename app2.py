@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import openpyxl
+from openpyxl.styles import Border, Side, PatternFill
 
 # Estrutura de dados em memória
 foranias = {}  # { 'Forania 1': { 'Grupo 1': [ {servo}, ... ] } }
@@ -70,35 +71,59 @@ def exportar_excel():
         ws = wb.active
         ws.title = "Servos"
 
-        # Variável para controlar a linha atual na planilha
-        row_index = 1
+        thin_border = Border(
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin")
+        )
+
+        row_index = 1  # controla a linha atual
 
         for forania, grupos in foranias.items():
-            # Cabeçalho da Forania
-            ws.cell(row=row_index, column=1, value="Forania").font = openpyxl.styles.Font(bold=True)
-            ws.cell(row=row_index, column=2, value=forania).font = openpyxl.styles.Font(bold=True)
-            row_index += 2  # Pula duas linhas para o próximo bloco
+            start_row = row_index 
 
-            # Cabeçalhos da tabela do grupo
-            ws.cell(row=row_index, column=1, value="Grupo")
-            ws.cell(row=row_index, column=2, value="Nome")
-            ws.cell(row=row_index, column=3, value="Módulo Básico")
-            ws.cell(row=row_index, column=4, value="Exp. Oração")
-            ws.cell(row=row_index, column=5, value="Apostila 1")
-            ws.cell(row=row_index, column=6, value="Apostila 2")
-            row_index += 1
+            # Cabeçalho da Forania
+            #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
+            ws.cell(row=row_index, column=1, value=forania).font = openpyxl.styles.Font(bold=True)
+            cell_forania = ws.cell(row=row_index, column=1)
+            cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+            row_index += 2
 
             for grupo, servos in grupos.items():
+                # Cabeçalho do Grupo
+                #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
+                ws.cell(row=row_index, column=1, value=grupo).font = openpyxl.styles.Font(bold=True)
+                row_index += 1
+
+                # Cabeçalhos da tabela
+                ws.cell(row=row_index, column=2, value="Nome")
+                ws.cell(row=row_index, column=3, value="Módulo Básico")
+                ws.cell(row=row_index, column=4, value="Exp. Oração")
+                ws.cell(row=row_index, column=5, value="Apostila 1")
+                ws.cell(row=row_index, column=6, value="Apostila 2")
+                row_index += 1
+
+                # Dados dos servos
                 for servo in servos:
-                    ws.cell(row=row_index, column=1, value=grupo)
                     ws.cell(row=row_index, column=2, value=servo["nome"])
                     ws.cell(row=row_index, column=3, value="Sim" if servo["modulo_basico"] else "Não")
                     ws.cell(row=row_index, column=4, value="Sim" if servo["exp_oracao"] else "Não")
                     ws.cell(row=row_index, column=5, value="Sim" if servo["apostila1"] else "Não")
                     ws.cell(row=row_index, column=6, value="Sim" if servo["apostila2"] else "Não")
                     row_index += 1
+
+                # Linha em branco entre grupos
+                row_index += 1
             
-            # Adiciona uma linha em branco para separar as foranias
+            end_row = row_index - 1
+
+            # Aplicar bordas
+            for r in range(start_row, end_row + 1):
+                for c in range(1, 7):
+                    ws.cell(row=r, column=c).border = thin_border
+
+            # Linha em branco entre foranias
             row_index += 1
 
         wb.save(caminho)
@@ -204,5 +229,7 @@ scrollbar.pack(side="right", fill="y")
 
 # Substitui o antigo frame_resultados
 frame_resultados = scrollable_frame
+
+
 
 janela.mainloop()
