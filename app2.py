@@ -85,33 +85,53 @@ def exportar_excel():
 
             # Cabeçalho da Forania
             #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
-            ws.cell(row=row_index, column=1, value=forania).font = openpyxl.styles.Font(bold=True)
-            cell_forania = ws.cell(row=row_index, column=1)
-            cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+            # ws.cell(row=row_index, column=1, value=forania).font = openpyxl.styles.Font(bold=True)
+            # cell_forania = ws.cell(row=row_index, column=1)
+            # cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+
+            fill_forania = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+
+            for col in range(1, 7):  # da coluna 1 até 6
+                cell = ws.cell(row=row_index, column=col)
+                if col == 1:  # escreve o nome da Forania só na primeira coluna
+                    cell.value = forania
+                    cell.font = openpyxl.styles.Font(bold=True)
+                cell.fill = fill_forania
+
             row_index += 2
 
             for grupo, servos in grupos.items():
                 # Cabeçalho do Grupo
                 #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
-                ws.cell(row=row_index, column=1, value=grupo).font = openpyxl.styles.Font(bold=True)
-                row_index += 1
+                # ws.cell(row=row_index, column=1, value=grupo).font = openpyxl.styles.Font(bold=True)
 
-                # Cabeçalhos da tabela
-                ws.cell(row=row_index, column=2, value="Nome")
-                ws.cell(row=row_index, column=3, value="Módulo Básico")
-                ws.cell(row=row_index, column=4, value="Exp. Oração")
-                ws.cell(row=row_index, column=5, value="Apostila 1")
-                ws.cell(row=row_index, column=6, value="Apostila 2")
-                row_index += 1
+                
+             fill_grupo = PatternFill(start_color="FF9999", end_color="FF9999", fill_type="solid")
+
+            for col in range(1, 7):  # da coluna 1 até 6
+                    cell = ws.cell(row=row_index, column=col)
+                    if col == 1:  # escreve o nome do Grupo só na primeira coluna
+                        cell.value = grupo
+                        cell.font = openpyxl.styles.Font(bold=True)
+                    cell.fill = fill_grupo
+            row_index += 1
+
+            # Cabeçalhos da tabela
+            ws.cell(row=row_index, column=2, value="Nome")
+            ws.cell(row=row_index, column=3, value="Módulo Básico")
+            ws.cell(row=row_index, column=4, value="Exp. Oração")
+            ws.cell(row=row_index, column=5, value="Apostila 1")
+            ws.cell(row=row_index, column=6, value="Apostila 2")
+            row_index += 1
 
                 # Dados dos servos
-                for servo in servos:
-                    ws.cell(row=row_index, column=2, value=servo["nome"])
-                    ws.cell(row=row_index, column=3, value="Sim" if servo["modulo_basico"] else "Não")
-                    ws.cell(row=row_index, column=4, value="Sim" if servo["exp_oracao"] else "Não")
-                    ws.cell(row=row_index, column=5, value="Sim" if servo["apostila1"] else "Não")
-                    ws.cell(row=row_index, column=6, value="Sim" if servo["apostila2"] else "Não")
-                    row_index += 1
+            for servo in servos:
+                ws.cell(row=row_index, column=2, value=servo["nome"])
+                ws.cell(row=row_index, column=3, value="Sim" if servo["modulo_basico"] else "Não")
+                ws.cell(row=row_index, column=4, value="Sim" if servo["exp_oracao"] else "Não")
+                ws.cell(row=row_index, column=5, value="Sim" if servo["apostila1"] else "Não")
+                ws.cell(row=row_index, column=6, value="Sim" if servo["apostila2"] else "Não")
+                row_index += 1
 
                 # Linha em branco entre grupos
                 row_index += 1
