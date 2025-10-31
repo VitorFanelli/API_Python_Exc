@@ -1,34 +1,40 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import openpyxl
-from openpyxl.styles import Border, Side, PatternFill
+from openpyxl import Workbook
+from openpyxl.styles import Border, Side, PatternFill, Alignment, Font
+from openpyxl.utils import get_column_letter
 
 # Estrutura de dados em memória
 foranias = {}  # { 'Forania 1': { 'Grupo 1': [ {servo}, ... ] } }
 
-# Funções
+# ---- Funções ----
+
 def adicionar_forania():
     nome = entrada_forania.get().strip()
-    if nome:
-        if nome not in foranias:
-            foranias[nome] = {}
-            atualizar_combo_forania()
-            renderizar()
-            entrada_forania.delete(0, tk.END)
-        else:
-            messagebox.showwarning("Aviso", "Forania já existe.")
+    if not nome:
+        messagebox.showwarning("Aviso", "Informe o nome da Forania.")
+        return
+    if nome in foranias:
+        messagebox.showinfo("Info", "Forania já existe.")
+        return
+    foranias[nome] = {}
+    atualizar_combo_forania()
+    entrada_forania.delete(0, tk.END)
+    renderizar()
 
 def adicionar_grupo():
     forania = combo_forania.get()
     nome = entrada_grupo.get().strip()
-    if forania and nome:
-        if nome not in foranias[forania]:
-            foranias[forania][nome] = []
-            atualizar_combo_grupo()
-            renderizar()
-            entrada_grupo.delete(0, tk.END)
-        else:
-            messagebox.showwarning("Aviso", "Grupo já existe.")
+    if not (forania and nome):
+        messagebox.showwarning("Aviso", "Informe a forania e o grupo.")
+        return
+    if nome in foranias[forania]:
+        messagebox.showinfo("Info", "Grupo já existe.")
+        return
+    foranias[forania][nome] = []
+    atualizar_combo_grupo()
+    entrada_grupo.delete(0, tk.END)
+    renderizar()
 
 def adicionar_servo():
     forania = combo_forania.get()
@@ -60,95 +66,194 @@ def atualizar_combo_grupo(*args):
     if forania:
         combo_grupo['values'] = list(foranias[forania].keys())
 
+
+
+
+# def exportar_excel():
+#     if not foranias:
+#         messagebox.showwarning("Aviso", "Nenhum dado para exportar.")
+#         return
+
+#     caminho = filedialog.asksaveasfilename(
+#         defaultextension=".xlsx",
+#         filetypes=[("Excel files", "*.xlsx")]
+#     )
+
+#     if not caminho:
+#         return
+
+#     wb = Workbook()
+#     ws = wb.active
+#     ws.title = "Servos"
+
+#     # Estilos
+#     thin_border = Border(
+#         left=Side(style="thin"),
+#         right=Side(style="thin"),
+#         top=Side(style="thin"),
+#         bottom=Side(style="thin")
+#     )
+
+#     row_index = 1
+
+#     for forania, grupos in foranias.items():
+#         start_row = row_index
+
+#         # Cabeçalho da Forania
+#         ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=6)
+#         cell_forania = ws.cell(row=row_index, column=1, value=forania)
+#         cell_forania.font = Font(bold=True)
+#         cell_forania.alignment = Alignment(horizontal="center", vertical="center")
+#         cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+#         row_index += 1  # sem linha em branco aqui
+
+#         for grupo, servos in grupos.items():
+#             # Cabeçalho do Grupo
+#             ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=6)
+#             cell_grupo = ws.cell(row=row_index, column=1, value=grupo)
+#             cell_grupo.font = Font(bold=True)
+#             cell_grupo.alignment = Alignment(horizontal="center", vertical="center")
+#             cell_grupo.fill = PatternFill(start_color="FF9999", end_color="FF9999", fill_type="solid")
+#             row_index += 1
+
+#             # Cabeçalhos da tabela (em negrito)
+#             headers = ["Nome", "Módulo Básico", "Exp. Oração", "Apostila 1", "Apostila 2"]
+#             for col, header in enumerate(headers, start=1):
+#                 cell = ws.cell(row=row_index, column=col, value=header)
+#                 cell.font = Font(bold=True)
+#                 cell.alignment = Alignment(horizontal="center", vertical="center")
+#                 cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+#             row_index += 1
+
+#             # Dados dos servos
+#             for servo in servos:
+#                 ws.cell(row=row_index, column=1, value=servo["nome"]).alignment = Alignment(horizontal="left", vertical="center")
+#                 ws.cell(row=row_index, column=2, value="Sim" if servo["modulo_basico"] else "Não").alignment = Alignment(horizontal="center")
+#                 ws.cell(row=row_index, column=3, value="Sim" if servo["exp_oracao"] else "Não").alignment = Alignment(horizontal="center")
+#                 ws.cell(row=row_index, column=4, value="Sim" if servo["apostila1"] else "Não").alignment = Alignment(horizontal="center")
+#                 ws.cell(row=row_index, column=5, value="Sim" if servo["apostila2"] else "Não").alignment = Alignment(horizontal="center")
+#                 row_index += 1
+
+#         # 🔹 Linha em branco entre foranias
+#         row_index += 1  
+
+#         # Bordas para o bloco
+#         end_row = row_index - 1
+#         for r in range(start_row, end_row + 1):
+#             for c in range(1, 7):
+#                 ws.cell(row=r, column=c).border = thin_border
+
+#     # Ajuste de largura das colunas
+#     from openpyxl.utils import get_column_letter
+#     for i, col in enumerate(ws.columns, start=1):
+#         max_length = 0
+#         for cell in col:
+#             try:
+#                 if cell.value:
+#                     max_length = max(max_length, len(str(cell.value)))
+#             except AttributeError:
+#                 pass
+#         ws.column_dimensions[get_column_letter(i)].width = max_length + 2
+
+#     wb.save(caminho)
+#     messagebox.showinfo("Sucesso", f"Dados exportados com sucesso para:\n{caminho}")
+
+
+
 def exportar_excel():
     if not foranias:
         messagebox.showwarning("Aviso", "Nenhum dado para exportar.")
         return
 
-    caminho = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
-    if caminho:
-        wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Servos"
+    caminho = filedialog.asksaveasfilename(
+        defaultextension=".xlsx",
+        filetypes=[("Excel files", "*.xlsx")]
+    )
 
-        thin_border = Border(
+    if not caminho:
+        return
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Servos"
+
+    # Estilos
+    thin_border = Border(
         left=Side(style="thin"),
         right=Side(style="thin"),
         top=Side(style="thin"),
         bottom=Side(style="thin")
-        )
+    )
 
-        row_index = 1  # controla a linha atual
+    row_index = 1
+    num_cols = 5  # Agora limitamos a 5 colunas (A até E)
 
-        for forania, grupos in foranias.items():
-            start_row = row_index 
+    for forania, grupos in foranias.items():
+        start_row = row_index
 
-            # Cabeçalho da Forania
-            #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
-            # ws.cell(row=row_index, column=1, value=forania).font = openpyxl.styles.Font(bold=True)
-            # cell_forania = ws.cell(row=row_index, column=1)
-            # cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+        # Cabeçalho da Forania
+        ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=num_cols)
+        cell_forania = ws.cell(row=row_index, column=1, value=forania)
+        cell_forania.font = Font(bold=True)
+        cell_forania.alignment = Alignment(horizontal="center", vertical="center")
+        cell_forania.fill = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
+        row_index += 1
 
-            fill_forania = PatternFill(start_color="FFD966", end_color="FFD966", fill_type="solid")
-
-            for col in range(1, 7):  # da coluna 1 até 6
-                cell = ws.cell(row=row_index, column=col)
-                if col == 1:  # escreve o nome da Forania só na primeira coluna
-                    cell.value = forania
-                    cell.font = openpyxl.styles.Font(bold=True)
-                cell.fill = fill_forania
-
-            row_index += 2
-
-            for grupo, servos in grupos.items():
-                # Cabeçalho do Grupo
-                #ws.cell(row=row_index, column=1, value="").font = openpyxl.styles.Font(bold=True)
-                # ws.cell(row=row_index, column=1, value=grupo).font = openpyxl.styles.Font(bold=True)
-
-                
-             fill_grupo = PatternFill(start_color="FF9999", end_color="FF9999", fill_type="solid")
-
-            for col in range(1, 7):  # da coluna 1 até 6
-                    cell = ws.cell(row=row_index, column=col)
-                    if col == 1:  # escreve o nome do Grupo só na primeira coluna
-                        cell.value = grupo
-                        cell.font = openpyxl.styles.Font(bold=True)
-                    cell.fill = fill_grupo
+        for grupo, servos in grupos.items():
+            # Cabeçalho do Grupo
+            ws.merge_cells(start_row=row_index, start_column=1, end_row=row_index, end_column=num_cols)
+            cell_grupo = ws.cell(row=row_index, column=1, value=grupo)
+            cell_grupo.font = Font(bold=True)
+            cell_grupo.alignment = Alignment(horizontal="center", vertical="center")
+            cell_grupo.fill = PatternFill(start_color="FF9999", end_color="FF9999", fill_type="solid")
             row_index += 1
 
-            # Cabeçalhos da tabela
-            ws.cell(row=row_index, column=2, value="Nome")
-            ws.cell(row=row_index, column=3, value="Módulo Básico")
-            ws.cell(row=row_index, column=4, value="Exp. Oração")
-            ws.cell(row=row_index, column=5, value="Apostila 1")
-            ws.cell(row=row_index, column=6, value="Apostila 2")
+            # Cabeçalho da Tabela
+            headers = ["Nome", "Módulo Básico", "Exp. Oração", "Apostila 1", "Apostila 2"]
+            for col, header in enumerate(headers, start=1):
+                cell = ws.cell(row=row_index, column=col, value=header)
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal="center", vertical="center")
+                cell.fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
             row_index += 1
 
-                # Dados dos servos
+            # Linhas de dados
             for servo in servos:
-                ws.cell(row=row_index, column=2, value=servo["nome"])
-                ws.cell(row=row_index, column=3, value="Sim" if servo["modulo_basico"] else "Não")
-                ws.cell(row=row_index, column=4, value="Sim" if servo["exp_oracao"] else "Não")
-                ws.cell(row=row_index, column=5, value="Sim" if servo["apostila1"] else "Não")
-                ws.cell(row=row_index, column=6, value="Sim" if servo["apostila2"] else "Não")
+                ws.cell(row=row_index, column=1, value=servo["nome"]).alignment = Alignment(horizontal="left", vertical="center")
+                ws.cell(row=row_index, column=2, value="Sim" if servo["modulo_basico"] else "Não").alignment = Alignment(horizontal="center")
+                ws.cell(row=row_index, column=3, value="Sim" if servo["exp_oracao"] else "Não").alignment = Alignment(horizontal="center")
+                ws.cell(row=row_index, column=4, value="Sim" if servo["apostila1"] else "Não").alignment = Alignment(horizontal="center")
+                ws.cell(row=row_index, column=5, value="Sim" if servo["apostila2"] else "Não").alignment = Alignment(horizontal="center")
                 row_index += 1
 
-                # Linha em branco entre grupos
-                row_index += 1
-            
-            end_row = row_index - 1
+        # 🔹 Linha em branco total (sem bordas, sem preenchimento)
+        row_index += 1
+        for c in range(1, num_cols + 1):
+            cell = ws.cell(row=row_index, column=c, value=None)
+            cell.border = Border()  # Sem bordas
+            cell.fill = PatternFill()  # Sem cor
 
-            # Aplicar bordas
-            for r in range(start_row, end_row + 1):
-                for c in range(1, 7):
-                    ws.cell(row=r, column=c).border = thin_border
+        row_index += 1  # avança para a próxima forania
 
-            # Linha em branco entre foranias
-            row_index += 1
+        # Bordas
+        end_row = row_index - 2
+        for r in range(start_row, end_row + 1):
+            for c in range(1, num_cols + 1):
+                cell = ws.cell(row=r, column=c)
+                if cell.value:
+                    cell.border = thin_border
 
-        wb.save(caminho)
-        messagebox.showinfo("Sucesso", f"Dados exportados com sucesso para:\n{caminho}")
+    # Ajuste de largura das colunas
+    from openpyxl.utils import get_column_letter
+    for i in range(1, num_cols + 1):
+        max_length = 0
+        for cell in ws[get_column_letter(i)]:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws.column_dimensions[get_column_letter(i)].width = max_length + 2
 
+    wb.save(caminho)
+    messagebox.showinfo("Sucesso", f"Dados exportados com sucesso para:\n{caminho}")
 
 def renderizar():
     for widget in frame_resultados.winfo_children():
@@ -176,12 +281,12 @@ def renderizar():
                 ))
             tree.pack(fill='x')
 
-# UI principal
+# ---- UI principal ----
 janela = tk.Tk()
 janela.title("Cadastro de Foranias, Grupos e Servos")
 janela.geometry("850x700")
 
-# --- Cadastro ---
+# --- Frame de Cadastro ---
 frame_cadastro = ttk.LabelFrame(janela, text="Cadastro")
 frame_cadastro.pack(fill='x', padx=10, pady=10)
 
@@ -236,20 +341,15 @@ scrollable_frame = ttk.Frame(canvas)
 
 scrollable_frame.bind(
     "<Configure>",
-    lambda e: canvas.configure(
-        scrollregion=canvas.bbox("all")
-    )
+    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
 )
 
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 canvas.configure(yscrollcommand=scrollbar.set)
 
-canvas.pack(side="left", fill="both", expand=True)
+canvas.pack(side="left", fill='both', expand=True)
 scrollbar.pack(side="right", fill="y")
 
-# Substitui o antigo frame_resultados
 frame_resultados = scrollable_frame
-
-
 
 janela.mainloop()
